@@ -1,34 +1,26 @@
-import React, { useRef } from 'react';
-import { Canvas, useFrame } from 'react-three-fiber';
-import { useGLTF } from '@react-three/drei';
-import { XR } from '@react-three/xr';
+import React from 'react';
+import { Canvas } from 'react-three-fiber';
+import { ARButton } from '@react-three/drei';
+import { useAR } from '@react-three/xr';
 
-function Model() {
-  const mesh = useRef();
-  const gltf = useGLTF('/models/chair/scene.gltf');
+const Model = () => {
+  const { gltf } = useLoader(GLTFLoader, '/models/chair/scene.gltf');
+  return <primitive object={gltf.scene} />;
+};
 
-  useFrame(({ camera }) => {
-    if (mesh.current) {
-      mesh.current.rotation.x += 0.01;
-      mesh.current.rotation.y += 0.01;
-      mesh.current.position.copy(camera.position);
-      mesh.current.position.z -= 1;
-    }
-  });
+const ARScene = () => {
+  const { isPresenting } = useAR();
 
-  return <primitive object={gltf.scene} ref={mesh} />;
-}
-
-function ARScene() {
   return (
-    <Canvas>
-      <XR buttonPosition="bottom-right">
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
+    <div>
+      <Canvas>
+        <ambientLight intensity={0.5} />
+        <directionalLight color="white" intensity={0.6} />
         <Model />
-      </XR>
-    </Canvas>
+      </Canvas>
+      {!isPresenting && <ARButton sessionInit={{ requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } }} />}
+    </div>
   );
-}
+};
 
 export default ARScene;
