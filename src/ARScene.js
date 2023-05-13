@@ -1,27 +1,33 @@
 import React, { useRef } from 'react';
-import { VRCanvas, DefaultXRControllers, useXR } from '@react-three/xr';
+import { Canvas, useFrame } from 'react-three-fiber';
 import { useGLTF } from '@react-three/drei';
+import { XR } from '@react-three/xr';
 
 function Model() {
-  const { player } = useXR();
   const mesh = useRef();
-  const gltf = useGLTF('/model.gltf');
+  const gltf = useGLTF('/models/chair/scene.gltf');
 
-  if (player) {
-    mesh.current.position.set(player.position.x, player.position.y, player.position.z - 1);
-  }
+  useFrame(({ camera }) => {
+    if (mesh.current) {
+      mesh.current.rotation.x += 0.01;
+      mesh.current.rotation.y += 0.01;
+      mesh.current.position.copy(camera.position);
+      mesh.current.position.z -= 1;
+    }
+  });
 
   return <primitive object={gltf.scene} ref={mesh} />;
 }
 
 function ARScene() {
   return (
-    <VRCanvas>
-      <DefaultXRControllers />
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <Model />
-    </VRCanvas>
+    <Canvas>
+      <XR buttonPosition="bottom-right">
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Model />
+      </XR>
+    </Canvas>
   );
 }
 
